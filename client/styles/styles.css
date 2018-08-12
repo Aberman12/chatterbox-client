@@ -93,3 +93,18 @@ form input[type=text] {
     margin-bottom:3px;
 }
 
+#friends {
+    background:white;
+    text-align: center;
+    font-size: 20px;
+    width: 200px;
+    /* height: 200px; */
+    margin-left: -330px;
+    margin-top: 10px;
+    position:absolute;
+}
+
+#friend {
+    font-size: 20px;
+}
+

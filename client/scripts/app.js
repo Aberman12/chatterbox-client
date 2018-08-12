@@ -1,9 +1,11 @@
 
 var app = {
-  username: 'alekz',
-  roomname: 'lobby',
+  username: 'ahleckszahnder',
+  roomname: $('#roomSelect').val(),
+  friends: [],
   init: function() {
     this.fetch();
+    setInterval(app.fetch.bind(app), 3000);
   },
 
   send: function(message) {
@@ -15,7 +17,8 @@ var app = {
       data: JSON.stringify(message),
       contentType: 'application/json',
       success: function (data) {
-        // app.fetch();
+          app.clearMessages();
+        app.fetch();
         console.log('chatterbox: Message sent', data);
       },
       error: function (data) {
@@ -36,10 +39,17 @@ var app = {
       data: { order: '-createdAt' },
       // contentType: 'application/json',
       success: function (data) {
-        console.log(data);
-        data.results.forEach(function(item) {
-          app.renderMessage(item);
+        var last;
+        console.log('heres your data', data.results);
+        data.results.forEach(item => {
+          console.log('heres your items ', item);
+          if (item.text !== last && item.text.indexOf('<') === -1 && item.text.length < 200) {
+            console.log('made it through ',item);
+            app.renderMessage(item);
+          }
+          last = item.text;
         });
+
       },
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -55,8 +65,25 @@ var app = {
 
   renderMessage(message) {
     var chats = $('#chats');
-    chats.append('<div id="message"><h4 onClick="app.addFriend()">' + message.username + ': </h4><p>' + message.text + '</p></div>');
+    console.log(message);
+    chats.append('<div id="message"><h4 id="' + message.username + '">' + message.username + ': </h4><p>' + message.text + '</p></div>');
+    
+    $('#' + message.username).on('click', function() {
+      var name = message.username;
+      console.log('made it to onclick', name);
+      app.addFriend(name);
+    });
   },
+
+  addFriend(friend) {
+    console.log('heres friend', friend);
+    if (app.friends.indexOf(friend) === -1) {
+      app.friends.push(friend);
+      $('#friends').append('<p id="friend">' + friend + '</p>');
+    }
+
+  },
+    
   createPostMessage() {
     var inputValue = $('#input');
     var messager = inputValue.val();
@@ -67,22 +94,33 @@ var app = {
     };
     console.log('heres your input value', messager);
     app.send(obj);
+    inputValue.val('');
     event.preventDefault();
   },
 
   renderRoom(room) {
     var rooms = $('#roomSelect');
-    rooms.append('<option value=' + room + '>' + room + '</option>');
+    var newRoom = $('#newRoom').val();
+    rooms.append('<option value=' + newRoom + '>' + newRoom + '</option>');
+    app.roomname = newRoom;
   },
 
-  mountMessages(data) {
-    data.forEach(function(item) {
-      console.log(item);
-    });
-  }
+//   mountMessages(data) {
+//     data.forEach(function(item) {
+//       console.log(item);
+//     });
+//   }
 };
-
 
 $(document).ready(function() {
   app.init();
+
+  $('#input').keyup(function(event) {
+    console.log('asdfasdfasdfasdfasdfasdf');
+    if (event.keyCode === 13) {
+      app.createPostMessage();
+    }
+  });
+
 });
+
